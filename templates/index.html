@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch | Movie Recommender</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/movie-recommender.svg" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <img src="/assets/movie-recommender.svg" alt="CineMatch logo" class="brand-icon" />
+          <div class="brand">CineMatch</div>
+        </div>
+        <nav>
+          <a href="#discover">Discover</a>
+          <a href="#popular">Popular</a>
+          <a href="#about">About</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow">Movie discovery engine</span>
+            <h1>Find your next favorite film.</h1>
+            <p>
+              Search by a movie you already love and get personalized recommendations based on shared
+              genres, directors, writers, and movie metadata.
+            </p>
+
+            <form method="POST" action="/recommend" class="search-form">
+              <input
+                type="text"
+                name="movie"
+                placeholder="Try: Inception, The Dark Knight, Titanic"
+                value="{{ query or '' }}"
+              />
+              <button type="submit">Recommend</button>
+            </form>
+          </div>
+
+          <aside class="hero-card">
+            <div class="badge">Top Rated</div>
+            <h2>{{ popular[0].title if popular else 'No movie' }}</h2>
+            <p>{{ popular[0].rating if popular else '0.0' }} / 10</p>
+            <div class="stats">
+              <div>
+                <span>Genre</span>
+                <strong>{{ popular[0].genres if popular and popular[0].genres else 'Drama' }}</strong>
+              </div>
+              <div>
+                <span>Runtime</span>
+                <strong>{{ popular[0].runtime if popular and popular[0].runtime else '120' }} min</strong>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section id="discover" class="recommendations">
+          <div class="section-heading">
+            <h2>Recommended for you</h2>
+          </div>
+
+          {% if results %}
+          <div class="movie-grid">
+            {% for movie in results %}
+            <article class="movie-card">
+              <div class="movie-poster poster-{{ loop.index % 5 + 1 }}">
+                <span>{{ movie.title[:1] }}</span>
+              </div>
+              <div class="movie-info">
+                <h3>{{ movie.title }}</h3>
+                <p class="meta">{{ movie.genres }} • {{ movie.year }}</p>
+                <div class="score-row">
+                  <span>⭐ {{ movie.rating }}</span>
+                  <span>🎯 {{ movie.similarity if movie.similarity is defined else '—' }}</span>
+                </div>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty-state">Search for a movie to view a recommendation list.</p>
+          {% endif %}
+        </section>
+
+        <section id="popular" class="popular-section">
+          <div class="section-heading">
+            <h2>Popular picks</h2>
+          </div>
+          <div class="movie-grid">
+            {% for movie in popular %}
+            <article class="movie-card">
+              <div class="movie-poster poster-{{ loop.index % 5 + 1 }} alt">
+                <span>{{ movie.title[:1] }}</span>
+              </div>
+              <div class="movie-info">
+                <h3>{{ movie.title }}</h3>
+                <p class="meta">{{ movie.genres }} • {{ movie.year }}</p>
+                <div class="score-row">
+                  <span>⭐ {{ movie.rating }}</span>
+                  <span>⏱ {{ movie.runtime }} min</span>
+                </div>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section id="about" class="about-box">
+          <h2>About this recommender</h2>
+          <p>
+            CineMatch uses content-based filtering with TF-IDF similarity across title, genre,
+            director, and writer metadata to suggest movies that match the vibe of the title you enter.
+          </p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
