@@ -2,8 +2,8 @@ from pathlib import Path
 
 from flask import Flask, render_template, request, send_from_directory
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+
+from src.hybrid_recommender import HybridRecommender
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_PATH = BASE_DIR / "data" / "movies_cleaned.csv"
@@ -21,60 +21,25 @@ movies = movies.fillna({
     "writers": "Unknown",
 })
 
-movies["combined_features"] = (
-    movies["title"].astype(str)
-    + " "
-    + movies["genres"].astype(str)
-    + " "
-    + movies["directors"].astype(str)
-    + " "
-    + movies["writers"].astype(str)
+ratings_path = BASE_DIR / "data" / "ratings.csv"
+recommender = HybridRecommender(
+    movies,
+    pd.read_csv(ratings_path) if ratings_path.exists() else None,
 )
-
-vectorizer = TfidfVectorizer(stop_words="english")
-feature_matrix = vectorizer.fit_transform(movies["combined_features"])
-similarity_matrix = cosine_similarity(feature_matrix, feature_matrix)
-
-
-def safe_title(movie_row):
-    return str(movie_row.get("title", "Unknown"))
 
 
 def get_popular_movies(limit=6):
     return movies.sort_values("rating", ascending=False).head(limit).to_dict("records")
 
 
-def get_recommendations(movie_title, limit=8):
-    normalized = (movie_title or "").strip()
-    if not normalized:
-        return get_popular_movies(limit=limit)
-
-    exact_match = movies[movies["title"].str.lower() == normalized.lower()]
-    if not exact_match.empty:
-        target_index = exact_match.index[0]
-    else:
-        contains_match = movies[movies["title"].str.lower().str.contains(normalized.lower())]
-        if contains_match.empty:
-            return get_popular_movies(limit=limit)
-        target_index = contains_match.index[0]
-
-    scores = list(enumerate(similarity_matrix[target_index]))
-    scores = sorted(scores, key=lambda item: item[1], reverse=True)
-    scored_movies = []
-
-    for index, score in scores:
-        if index == target_index:
-            continue
-        movie = movies.iloc[index].to_dict()
-        movie["similarity"] = round(float(score), 4)
-        scored_movies.append(movie)
-        if len(scored_movies) >= limit:
-            break
-
-    if not scored_movies:
-        return get_popular_movies(limit=limit)
-
-    return scored_movies
+def get_recommendations(movie_title, watch_history=(), search_history=(), limit=8):
+    results = recommender.recommend(
+        seed_title=movie_title,
+        watch_history=watch_history,
+        search_history=search_history,
+        limit=limit,
+    )
+    return results or get_popular_movies(limit=limit)
 
 
 @app.route("/assets/<path:filename>")
@@ -91,7 +56,11 @@ def home():
 @app.route("/recommend", methods=["POST"])
 def recommend():
     title = request.form.get("movie", "").strip()
-    recommendations = get_recommendations(title, limit=8)
+    watch_history = request.form.get("watch_history", "").splitlines()
+    search_history = request.form.get("search_history", "").splitlines()
+    recommendations = get_recommendations(
+        title, watch_history=watch_history, search_history=search_history, limit=8
+    )
     popular = get_popular_movies(limit=6)
     return render_template("index.html", popular=popular, results=recommendations, query=title)
 

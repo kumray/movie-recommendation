@@ -69,10 +69,16 @@ movie-recommendation/
 ├── assets/
 │   ├── movie-analysis.png
 │   └── movie-recommender.svg
+├── docs/
+│   └── CineMatch_ML_Movie_Recommender.pptx
 ├── data/
 │   └── movies_cleaned.csv
 ├── scripts/
-│   └── data_cleaning.py
+│   ├── data_cleaning.py
+│   └── train_hybrid_model.py
+├── src/
+│   ├── __init__.py
+│   └── hybrid_recommender.py
 ├── static/
 │   ├── app.js
 │   └── styles.css
@@ -208,3 +214,57 @@ Watch and search history can contain sensitive information. Store it securely, m
 - Add TF-IDF similarity for plot summaries and search text
 - Add collaborative filtering when data from multiple users is available
 - Add recommendation explanations such as “because you watched...”
+
+## Hybrid machine-learning model
+
+The project now includes [`src/hybrid_recommender.py`](src/hybrid_recommender.py), which combines three signals:
+
+- **Content-based filtering:** TF-IDF vectors and cosine similarity over title, genre, director, and writer metadata.
+- **Collaborative filtering:** item-to-item similarity learned from user ratings in a MovieLens-style `ratings.csv` file.
+- **Popularity:** a normalized rating-and-vote signal that improves cold-start recommendations.
+
+The final ranking is a weighted hybrid:
+
+```text
+score = 0.60 × content_similarity
+      + 0.30 × collaborative_similarity
+      + 0.10 × popularity
+```
+
+Watched titles are excluded from the result list. Search history is added to the content profile, while watched titles contribute to both content and collaborative signals. If no ratings file is available, the collaborative term safely becomes zero and the app continues as a content-plus-popularity recommender.
+
+## Using larger datasets
+
+The model accepts a local MovieLens dataset, a Kaggle export, or an IMDb developer dataset after mapping it to the expected columns. The recommended files are:
+
+```text
+data/movies_cleaned.csv
+data/ratings.csv
+```
+
+`movies_cleaned.csv` should contain `title`, `genres`, and optionally `movieId`, `directors`, `writers`, `rating`, and `votes`. `ratings.csv` should contain:
+
+```text
+userId,movieId,rating
+1,1,4.0
+1,50,5.0
+```
+
+MovieLens `movies.csv` and `ratings.csv` can be used directly if the movie metadata is compatible. For Kaggle or IMDb data, clean and map identifiers first; do not merge on title alone when a stable movie ID is available. Large source archives should not be committed to Git. Keep them locally or in object storage and commit only the processed sample, schema, and reproducible scripts.
+
+Train and save the hybrid model with:
+
+```bash
+python scripts/train_hybrid_model.py \
+  --movies data/movies_cleaned.csv \
+  --ratings data/ratings.csv \
+  --output data/hybrid_model.joblib
+```
+
+The Flask app automatically loads `data/ratings.csv` when it exists. The training script is useful for validating a large ratings export and creating a reusable model artifact; retrain it when the catalog or ratings data changes.
+
+The project presentation is available at [`docs/CineMatch_ML_Movie_Recommender.pptx`](docs/CineMatch_ML_Movie_Recommender.pptx).
+
+## Accuracy and evaluation
+
+More data does not automatically mean better recommendations. Measure improvements on a time-based holdout set so future interactions are not used to predict the past. Track Precision@K, Recall@K, NDCG@K, coverage, and diversity, and compare content-only against the hybrid weights before deploying a change.
