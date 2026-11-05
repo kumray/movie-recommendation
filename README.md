@@ -26,7 +26,13 @@ The project expects movie records with information such as:
 
 User history can include watched movie titles, search queries, timestamps, ratings, and watch duration. Keep personal history data local and remove sensitive information before sharing or committing files.
 
+The repository includes the cleaned movie dataset at [`data/movies_cleaned.csv`](data/movies_cleaned.csv) and the cleaning workflow at [`scripts/data_cleaning.py`](scripts/data_cleaning.py). The script reads `movies_list.xlsx` and writes `movies_cleaned.csv`.
+
 ## Exploratory Analysis
+
+The following visualization summarizes the cleaned dataset:
+
+![Movie dataset analysis](assets/movie-analysis.png)
 
 The initial analysis highlights several useful patterns in the movie dataset:
 
