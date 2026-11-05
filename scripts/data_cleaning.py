@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 # ---------- STEP 1: LOAD ----------
-df = pd.read_excel("movies_list.xlsx")
+df = pd.read_excel("movies_cleaned.xlsx")
 print("Shape:", df.shape)            # (rows, columns)
 print(df.head())
 
