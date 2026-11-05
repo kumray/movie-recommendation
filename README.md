@@ -41,6 +41,14 @@ recommendation_score =
 
 This makes recommendations reflect both what the user has watched and what they are currently searching for, while excluding movies already watched.
 
+## Role of machine learning
+
+Machine learning is used to turn unstructured movie information and user interests into measurable similarities. In this project, `scikit-learn`'s `TfidfVectorizer` learns the importance of words and metadata terms across the movie catalog. Common terms receive less weight, while distinctive terms such as a genre, director, or writer receive more useful weight.
+
+After vectorization, the application uses cosine similarity to compare movies in this feature space. A movie with similar metadata to the user's selected movie, watched movies, or search terms receives a higher similarity score and is ranked nearer the top. This is a content-based recommendation approach: it does not require ratings from other users and can recommend items from the available catalog even when a new user has little activity.
+
+The history-based design uses the same model to create a user preference profile. Watched movies provide long-term preference signals, while search history captures current interests. Recency, ratings, and feedback can be added as weights so that the ranking becomes more personalized over time.
+
 ## Features
 
 - Search for a movie title and receive similar recommendations
@@ -86,7 +94,29 @@ The cleaned dataset is stored in [`data/movies_cleaned.csv`](data/movies_cleaned
 - `writers`
 - `decade`
 
-The cleaning workflow is available in [`scripts/data_cleaning.py`](scripts/data_cleaning.py). It reads `movies_list.xlsx`, normalizes column names and text, handles missing values, removes duplicate title-year pairs, validates ratings, and creates additional features.
+The cleaning workflow is available in [`scripts/data_cleaning.py`](scripts/data_cleaning.py). It reads the source Excel workbook configured in the script, normalizes column names and text, handles missing values, removes duplicate title-year pairs, validates ratings, and creates additional features.
+
+## Data cleaning with Python
+
+The dataset is cleaned with the Python libraries **pandas** and **NumPy** before it is used by the recommender:
+
+1. **Load and inspect:** pandas reads the Excel source file and reports its shape, columns, data types, missing values, duplicate rows, and descriptive statistics.
+2. **Standardize column names:** whitespace is removed, names are converted to lowercase, and spaces are replaced with underscores. Source names such as `PRIMARY TITLE`, `DIRECTORS`, `WRITERS`, and `GENRES` are mapped to consistent names used by the application.
+3. **Normalize text:** title, director, writer, and genre values are converted to strings, trimmed, and cleaned so repeated whitespace and inconsistent comma spacing do not create different-looking values.
+4. **Handle missing and invalid values:** missing writers are labeled `Unknown`. Numeric fields such as rating, runtime, votes, and year are converted with `pd.to_numeric`; invalid values become missing and are filled with the relevant median. Rows without a title or genre are removed because they cannot be matched reliably.
+5. **Fix data types:** year, runtime, and votes are stored as integers, while ratings are stored as floating-point values.
+6. **Remove duplicates:** duplicate title-year pairs are removed while preserving remakes released in different years.
+7. **Validate and flag outliers:** ratings are checked to ensure they fall between 0 and 10. NumPy calculates the interquartile range for runtime values, and unusual runtimes are flagged instead of being silently deleted.
+8. **Create useful features:** the script derives release decade, main genre, number of genres, movie length category, and a vote-adjusted `weighted_rating`.
+9. **Export the cleaned data:** pandas writes the final dataset to `movies_cleaned.csv`; this file is used as `data/movies_cleaned.csv` by the Flask application.
+
+Run the cleaning script after placing the source Excel file in the expected location. The current script expects `movies_cleaned.xlsx` in its working directory and writes `movies_cleaned.csv` there:
+
+```bash
+python scripts/data_cleaning.py
+```
+
+Move or save the generated CSV as `data/movies_cleaned.csv` for the Flask application. The cleaning step improves recommendation quality by making metadata consistent, preventing missing values from breaking vectorization, and adding structured features that can be used for ranking and analysis.
 
 ## Run locally
 
