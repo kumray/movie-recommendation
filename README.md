@@ -190,6 +190,26 @@ Search and watch events should be stored securely. Do not commit raw personal hi
 
 The analysis shows the most frequent genres, rating distribution, and average rating by decade. These signals can support ranking, filtering, and recommendation explanations.
 
+### Watch-outcome correlation charts
+
+`movies_cleaned.csv` contains movie metadata but does not contain user watch outcomes. To measure whether a recommendation was watched against its rating, runtime, and release decade, provide an outcome file with one row per recommendation:
+
+```csv
+title,year,watched
+Inception,2010,1
+The Matrix,1999,0
+```
+
+Generate the three charts with:
+
+```bash
+python scripts/watch_correlation_analysis.py \
+  --recommendations data/recommendation_outcomes.csv \
+  --output-dir assets/watch-correlations
+```
+
+The script writes `watched-vs-rating.png`, `watched-vs-runtime.png`, and `watched-vs-decade.png`. The rating and runtime charts show point-biserial correlation; the decade chart shows the watched percentage for each release decade. It fails if outcomes are missing, malformed, or cannot be matched to the catalog rather than presenting fabricated correlations.
+
 ## Evaluation
 
 When watch and search histories are available, evaluate recommendations with:
