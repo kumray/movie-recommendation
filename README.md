@@ -74,6 +74,7 @@ movie-recommendation/
 ├── data/
 │   └── movies_cleaned.csv
 ├── scripts/
+│   ├── analyze_recommendation_correlations.py
 │   ├── data_cleaning.py
 │   └── train_hybrid_model.py
 ├── src/
@@ -189,6 +190,22 @@ Search and watch events should be stored securely. Do not commit raw personal hi
 ![Movie dataset analysis](assets/movie-analysis.png)
 
 The analysis shows the most frequent genres, rating distribution, and average rating by decade. These signals can support ranking, filtering, and recommendation explanations.
+
+### Recommendation watch-outcome correlations
+
+To measure which recommendation properties are associated with a movie being watched, run:
+
+```bash
+python scripts/analyze_recommendation_correlations.py
+```
+
+The script uses the first 80% of each user's ratings as watch history, generates the top 20 recommendations, and labels a recommendation as watched when it appears in that user's later ratings. It calculates Pearson/point-biserial correlations for movie rating, runtime, same-genre match, vote count, popularity, content similarity, and recommendation score. It writes:
+
+- `analysis/recommendation_outcomes.csv` — one row per user/recommendation
+- `analysis/recommendation_correlations.csv` — correlation values
+- `analysis/recommendation_correlations.png` — correlation bar chart and rating distribution graph
+
+The `watched` column is an observed later-rating proxy for whether a recommendation was watched; it should not be interpreted as a causal effect.
 
 ## Evaluation
 
