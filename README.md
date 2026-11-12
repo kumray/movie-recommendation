@@ -75,6 +75,7 @@ movie-recommendation/
 │   └── movies_cleaned.csv
 ├── scripts/
 │   ├── analyze_recommendation_correlations.py
+│   ├── analyze_user_rating_correlations.py
 │   ├── data_cleaning.py
 │   └── train_hybrid_model.py
 ├── src/
@@ -206,6 +207,20 @@ The script uses the first 80% of each user's ratings as watch history, generates
 - `analysis/recommendation_correlations.png` — correlation bar chart and rating distribution graph
 
 The `watched` column is an observed later-rating proxy for whether a recommendation was watched; it should not be interpreted as a causal effect.
+
+### User rating correlations
+
+To explore how user ratings relate to movie metadata, run:
+
+```bash
+python scripts/analyze_user_rating_correlations.py
+```
+
+The script joins MovieLens ratings to the cleaned movie data and calculates correlations between user rating and movie rating, runtime, and release decade. Genres are encoded as one-hot indicators and reported with point-biserial correlations. It writes:
+
+- `analysis/user_rating_metadata.csv` — matched user ratings and movie metadata
+- `analysis/user_rating_correlations.csv` — numeric and genre correlation values
+- `analysis/user_rating_correlations.png` — scatter, decade-trend, and genre correlation plots
 
 ## Evaluation
 
