@@ -77,6 +77,8 @@ movie-recommendation/
 │   ├── analyze_recommendation_correlations.py
 │   ├── analyze_user_rating_correlations.py
 │   ├── data_cleaning.py
+│   ├── exploratory_data_analysis.py
+│   ├── preprocess_movies.py
 │   └── train_hybrid_model.py
 ├── src/
 │   ├── __init__.py
@@ -125,6 +127,25 @@ python scripts/data_cleaning.py
 ```
 
 Move or save the generated CSV as `data/movies_cleaned.csv` for the Flask application. The cleaning step improves recommendation quality by making metadata consistent, preventing missing values from breaking vectorization, and adding structured features that can be used for ranking and analysis.
+
+## Feature preprocessing
+
+To create a model-ready feature matrix from the cleaned catalog, run:
+
+```bash
+python scripts/preprocess_movies.py
+```
+
+The preprocessing pipeline uses pandas and NumPy to normalize fields, remove
+duplicate title-year rows, derive genre/length/decade features, and transform
+vote counts with `log1p`. Scikit-learn then imputes missing values, standardizes
+numeric features, and one-hot encodes categorical features. Results are saved
+under `analysis/preprocessing/`:
+
+- `movie_features.npz` — sparse feature matrix
+- `feature_names.csv` — column names for the matrix
+- `preprocessed_movies.csv` — rows aligned with the matrix
+- `preprocessor.joblib` — fitted transformer for future data
 
 ## Run locally
 
