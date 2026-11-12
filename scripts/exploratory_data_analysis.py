@@ -6,13 +6,6 @@ projects numeric movie features into two principal components with scikit-learn.
 Example:
     python scripts/exploratory_data_analysis.py
 """
-from __future__ import annotations
-
-from argparse import ArgumentParser
-import json
-from pathlib import Path
-import re
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
