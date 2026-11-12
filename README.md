@@ -222,6 +222,10 @@ The script joins MovieLens ratings to the cleaned movie data and calculates corr
 - `analysis/user_rating_correlations.csv` — numeric and genre correlation values
 - `analysis/user_rating_correlations.png` — scatter, decade-trend, and genre correlation plots
 
+#### Conclusion
+
+In the current dataset, user ratings have the strongest relationship with the movie's overall rating (`r = 0.299`). Runtime has a weak positive relationship (`r = 0.086`), while release decade has almost no linear relationship (`r = -0.051`). Genre relationships are also weak: Drama (`r = 0.072`) and War (`r = 0.065`) are the strongest positive associations, while Comedy (`r = -0.060`) and Horror (`r = -0.042`) are the strongest negative associations. These results describe associations in this dataset and should not be interpreted as causal effects or predictions of individual user preferences.
+
 ## Evaluation
 
 When watch and search histories are available, evaluate recommendations with:
