@@ -10,12 +10,6 @@ The analysis uses a chronological simulation:
 Example:
     python scripts/analyze_recommendation_correlations.py
 """
-from __future__ import annotations
-
-from argparse import ArgumentParser
-from pathlib import Path
-import re
-import sys
 
 import matplotlib.pyplot as plt
 import pandas as pd
