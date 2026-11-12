@@ -77,6 +77,8 @@ movie-recommendation/
 │   ├── analyze_recommendation_correlations.py
 │   ├── analyze_user_rating_correlations.py
 │   ├── data_cleaning.py
+│   ├── exploratory_data_analysis.py
+│   ├── preprocess_movies.py
 │   └── train_hybrid_model.py
 ├── src/
 │   ├── __init__.py
@@ -125,6 +127,25 @@ python scripts/data_cleaning.py
 ```
 
 Move or save the generated CSV as `data/movies_cleaned.csv` for the Flask application. The cleaning step improves recommendation quality by making metadata consistent, preventing missing values from breaking vectorization, and adding structured features that can be used for ranking and analysis.
+
+## Feature preprocessing
+
+To create a model-ready feature matrix from the cleaned catalog, run:
+
+```bash
+python scripts/preprocess_movies.py
+```
+
+The preprocessing pipeline uses pandas and NumPy to normalize fields, remove
+duplicate title-year rows, derive genre/length/decade features, and transform
+vote counts with `log1p`. Scikit-learn then imputes missing values, standardizes
+numeric features, and one-hot encodes categorical features. Results are saved
+under `analysis/preprocessing/`:
+
+- `movie_features.npz` — sparse feature matrix
+- `feature_names.csv` — column names for the matrix
+- `preprocessed_movies.csv` — rows aligned with the matrix
+- `preprocessor.joblib` — fitted transformer for future data
 
 ## Run locally
 
@@ -221,6 +242,24 @@ The script joins MovieLens ratings to the cleaned movie data and calculates corr
 - `analysis/user_rating_metadata.csv` — matched user ratings and movie metadata
 - `analysis/user_rating_correlations.csv` — numeric and genre correlation values
 - `analysis/user_rating_correlations.png` — scatter, decade-trend, and genre correlation plots
+
+### Python exploratory data analysis
+
+For a complete catalog profile using NumPy, pandas, and scikit-learn, run:
+
+```bash
+python scripts/exploratory_data_analysis.py
+```
+
+The script reports missing values and duplicates, summarizes genres and release
+decades, and uses `StandardScaler` and `PCA` to project numeric movie features.
+It writes the following files under `analysis/eda/`:
+
+- `dataset_summary.csv` — column types, missing values, cardinality, and numeric statistics
+- `genre_summary.csv` and `decade_summary.csv` — catalog distributions and average ratings
+- `pca_projection.csv` — two-component projection for each movie
+- `eda_report.json` — dataset totals and explained variance
+- `eda_overview.png` — four-panel visual summary
 
 #### Conclusion
 
