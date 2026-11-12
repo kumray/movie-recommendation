@@ -75,6 +75,7 @@ movie-recommendation/
 │   └── movies_cleaned.csv
 ├── scripts/
 │   ├── analyze_recommendation_correlations.py
+│   ├── analyze_user_rating_correlations.py
 │   ├── data_cleaning.py
 │   └── train_hybrid_model.py
 ├── src/
@@ -206,6 +207,24 @@ The script uses the first 80% of each user's ratings as watch history, generates
 - `analysis/recommendation_correlations.png` — correlation bar chart and rating distribution graph
 
 The `watched` column is an observed later-rating proxy for whether a recommendation was watched; it should not be interpreted as a causal effect.
+
+### User rating correlations
+
+To explore how user ratings relate to movie metadata, run:
+
+```bash
+python scripts/analyze_user_rating_correlations.py
+```
+
+The script joins MovieLens ratings to the cleaned movie data and calculates correlations between user rating and movie rating, runtime, and release decade. Genres are encoded as one-hot indicators and reported with point-biserial correlations. It writes:
+
+- `analysis/user_rating_metadata.csv` — matched user ratings and movie metadata
+- `analysis/user_rating_correlations.csv` — numeric and genre correlation values
+- `analysis/user_rating_correlations.png` — scatter, decade-trend, and genre correlation plots
+
+#### Conclusion
+
+In the current dataset, user ratings have the strongest relationship with the movie's overall rating (`r = 0.299`). Runtime has a weak positive relationship (`r = 0.086`), while release decade has almost no linear relationship (`r = -0.051`). Genre relationships are also weak: Drama (`r = 0.072`) and War (`r = 0.065`) are the strongest positive associations, while Comedy (`r = -0.060`) and Horror (`r = -0.042`) are the strongest negative associations. These results describe associations in this dataset and should not be interpreted as causal effects or predictions of individual user preferences.
 
 ## Evaluation
 
