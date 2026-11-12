@@ -6,13 +6,6 @@ one-hot encodes categorical features, and saves a sparse model-ready matrix.
 Example:
     python scripts/preprocess_movies.py
 """
-from __future__ import annotations
-
-from argparse import ArgumentParser
-from pathlib import Path
-import re
-
-import joblib
 import numpy as np
 import pandas as pd
 from scipy.sparse import save_npz
