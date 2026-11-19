@@ -59,6 +59,10 @@ The history-based design uses the same model to create a user preference profile
 - Responsive Flask web interface
 - Dataset analysis visualization
 
+## Live demo
+
+Try the [CinePulse movie recommendation website](https://sites.google.com/view/cinepulse-ds-5000-movies-recom/full-page-embed).
+
 ## Project structure
 
 ```text
